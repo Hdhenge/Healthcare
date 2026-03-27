@@ -35,13 +35,17 @@ export default function AuthPage() {
     try {
       if (isRegister) {
         await register(form.email, form.password, form.name, selectedRole);
-        toast.success('Account created! Welcome to MedConnect 🎉');
+        toast.success('Account created! Welcome 🎉');
+        // The context's fetchUserProfile will trigger redirection via the useEffect
       } else {
         const cred = await login(form.email, form.password);
-        toast.success(`Welcome back, ${cred.user.displayName || 'User'}!`);
+        toast.success(`Signing you in...`);
+        // If profile fetch in AuthContext is slow, we can wait a bit or let useEffect handle it
       }
     } catch (err) {
-      toast.error(err.message.replace('Firebase: ', '').replace(/\(.*\)/, ''));
+      console.error(err);
+      const msg = err.code ? err.code.split('/')[1].replace(/-/g, ' ') : err.message;
+      toast.error(msg.charAt(0).toUpperCase() + msg.slice(1));
     }
     setLoading(false);
   };

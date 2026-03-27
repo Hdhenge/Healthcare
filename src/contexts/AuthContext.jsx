@@ -45,13 +45,17 @@ export function AuthProvider({ children }) {
   }
 
   async function fetchUserProfile(user) {
+    if (!user) return;
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) {
-        setUserProfile(snap.data());
+        const data = snap.data();
+        setUserProfile(data);
+        return data;
       }
     } catch (e) {
       console.error('Error fetching profile', e);
+      // If we can't fetch profile, we might still have the user object
     }
   }
 
@@ -59,6 +63,7 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        setLoading(true);
         await fetchUserProfile(user);
       } else {
         setUserProfile(null);
@@ -68,11 +73,11 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  const value = { currentUser, userProfile, register, login, logout, loading };
+  const value = { currentUser, userProfile, register, login, logout, fetchUserProfile, loading };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

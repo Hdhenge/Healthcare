@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check authentication
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Profiles: Everyone authenticated can read anyone's profile (for vendor display), 
+    // but can only edit their own. Admin can read all.
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Inventory: Everyone signed in can read (for Customer search).
+    // Only vendors can write to their own inventory.
+    match /inventory/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.auth.uid == request.resource.data.vendorId;
+      allow update, delete: if signedIn() && request.auth.uid == resource.data.vendorId;
+    }
+
+    // Reminders: Private to the owner.
+    match /reminders/{id} {
+      allow read, write: if signedIn() && 
+        (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+  }
+}

@@ -33,15 +33,47 @@ import ManageUsers from './pages/admin/ManageUsers';
 import ManageVendors from './pages/admin/ManageVendors';
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { currentUser, userProfile, loading } = useAuth();
-  
-  if (loading) return null; // Wait for auth state to resolve
-  if (!currentUser) return <Navigate to="/auth" replace />;
-  
-  // If userProfile doesn't exist yet, we can't verify role
-  if (allowedRoles && (!userProfile || !allowedRoles.includes(userProfile.role))) {
+  const { currentUser, userProfile, loading, logout } = useAuth();
+  const [checking, setChecking] = useState(true);
+
+  React.useEffect(() => {
+    if (!loading) {
+      setChecking(false);
+    }
+  }, [loading]);
+
+  if (loading || checking) {
+    return (
+      <div className="min-h-screen bg-mesh flex items-center justify-center">
+        <div className="glass-card p-10 flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4" />
+          <p className="text-gray-400 font-medium">Authenticating & Fetching Profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
     return <Navigate to="/auth" replace />;
   }
+
+  // If we have currentUser but no profile after loading finishes, it's a data fetch issue or DB inconsistency
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-mesh flex items-center justify-center">
+        <div className="glass-card p-10 text-center max-w-sm">
+          <div className="text-red-400 mb-4 font-black text-2xl">Profile Missing</div>
+          <p className="text-gray-400 mb-6 text-sm">We couldn't load your account profile from the database. This might be a Firestore permission issue.</p>
+          <button onClick={() => logout()} className="btn-primary w-full">Back to Login</button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (allowedRoles && !allowedRoles.includes(userProfile.role)) {
+    return <Navigate to="/auth" replace />;
+  }
+  
   return children;
 }
 

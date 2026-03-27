@@ -4,6 +4,7 @@ import {
   MapPin, Bell, Camera, Calculator, Package, BarChart3,
   ShieldCheck, Zap, Users, TrendingUp, ArrowRight, Activity
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const features = [
   {
@@ -80,25 +81,42 @@ const roles = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { currentUser, userProfile } = useAuth();
+
+  const handleDashboard = () => {
+    if (userProfile?.role) {
+      navigate(`/${userProfile.role}`);
+    } else {
+      navigate('/auth');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-mesh text-white">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 glass-card rounded-none border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold gradient-text">MedConnect</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/auth')} className="btn-secondary py-2 text-sm">
-              Sign In
-            </button>
-            <button onClick={() => navigate('/auth?mode=register')} className="btn-primary py-2 text-sm">
-              Get Started
-            </button>
+            {currentUser ? (
+              <button onClick={handleDashboard} className="btn-primary py-2 px-6 text-sm flex items-center gap-2">
+                Dashboard <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <>
+                <button onClick={() => navigate('/auth')} className="btn-secondary py-2 text-sm px-5">
+                  Sign In
+                </button>
+                <button onClick={() => navigate('/auth?mode=register')} className="btn-primary py-2 text-sm px-5">
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -159,12 +177,19 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map(({ icon: Icon, title, desc, color }) => (
-              <div key={title} className="glass-card-hover p-6">
-                <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center mb-4`}>
+              <div 
+                key={title} 
+                onClick={() => navigate('/auth?mode=register')}
+                className="glass-card-hover p-6 cursor-pointer group hover:scale-[1.02] transition-all duration-300"
+              >
+                <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">{title}</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+                <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400/50 group-hover:text-emerald-400 transition-colors">
+                  Try Feature <ArrowRight className="w-3 h-3" />
+                </div>
               </div>
             ))}
           </div>

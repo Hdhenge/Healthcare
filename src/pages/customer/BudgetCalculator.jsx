@@ -16,6 +16,11 @@ export default function BudgetCalculator() {
   const [budget, setBudget] = useState('');
   const [selected, setSelected] = useState([]);
   const [results, setResults] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMeds = medicines.filter(m => 
+    m.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const toggle = (med) => {
     setSelected(prev => {
@@ -81,8 +86,14 @@ export default function BudgetCalculator() {
       {/* Medicine Selection */}
       <div className="glass-card p-6">
         <h3 className="text-white font-semibold mb-4">Select Your Medicines</h3>
-        <div className="space-y-2">
-          {medicines.map(med => {
+        <input 
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Filter medicines list..."
+          className="input-field mb-4 py-2 text-sm"
+        />
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+          {filteredMeds.map(med => {
             const isSelected = selected.find(m => m.name === med.name);
             const sel = selected.find(m => m.name === med.name);
             return (

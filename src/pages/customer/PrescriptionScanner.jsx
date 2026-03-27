@@ -17,11 +17,12 @@ export default function PrescriptionScanner() {
   const fileRef = useRef();
 
   const handleFile = (file) => {
-    if (!file || !file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+    if (!file || (!file.type.startsWith('image/') && file.type !== 'application/pdf')) {
+      toast.error('Please upload an image or PDF file');
       return;
     }
-    const url = URL.createObjectURL(file);
+    const isImage = file.type.startsWith('image/');
+    const url = isImage ? URL.createObjectURL(file) : null;
     setPreview(url);
     setStep('scanning');
     // Simulate OCR processing
@@ -78,7 +79,7 @@ export default function PrescriptionScanner() {
               <span className="badge badge-green">AI Medicine Extraction</span>
             </div>
           </div>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => handleFile(e.target.files[0])} />
+          <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={e => handleFile(e.target.files[0])} />
 
           <p className="text-center text-gray-500 text-sm mt-4">
             Your prescription data is processed securely and never stored permanently.

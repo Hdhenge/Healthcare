@@ -33,9 +33,13 @@ import ManageUsers from './pages/admin/ManageUsers';
 import ManageVendors from './pages/admin/ManageVendors';
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { currentUser, userProfile } = useAuth();
+  const { currentUser, userProfile, loading } = useAuth();
+  
+  if (loading) return null; // Wait for auth state to resolve
   if (!currentUser) return <Navigate to="/auth" replace />;
-  if (allowedRoles && userProfile && !allowedRoles.includes(userProfile.role)) {
+  
+  // If userProfile doesn't exist yet, we can't verify role
+  if (allowedRoles && (!userProfile || !allowedRoles.includes(userProfile.role))) {
     return <Navigate to="/auth" replace />;
   }
   return children;

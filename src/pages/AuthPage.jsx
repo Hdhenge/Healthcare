@@ -72,21 +72,28 @@ export default function AuthPage() {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-3">I am a...</label>
               <div className="grid grid-cols-3 gap-2">
-                {roles.map(({ id, label, icon: Icon, color }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setSelectedRole(id)}
-                    className={`p-3 rounded-xl border text-center transition-all duration-200 ${
-                      selectedRole === id
-                        ? `bg-${color}-500/20 border-${color}-500/50 text-${color}-400`
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mx-auto mb-1" />
-                    <span className="text-xs font-medium leading-tight">{label}</span>
-                  </button>
-                ))}
+                {roles.map(({ id, label, icon: Icon, color }) => {
+                  const colors = {
+                    emerald: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400',
+                    blue: 'bg-blue-500/20 border-blue-500/50 text-blue-400',
+                    violet: 'bg-violet-500/20 border-violet-500/50 text-violet-400',
+                  };
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setSelectedRole(id)}
+                      className={`p-3 rounded-xl border text-center transition-all duration-200 ${
+                        selectedRole === id
+                          ? colors[color]
+                          : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 mx-auto mb-1" />
+                      <span className="text-xs font-medium leading-tight">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

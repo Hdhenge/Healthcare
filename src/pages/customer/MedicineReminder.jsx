@@ -89,17 +89,27 @@ export default function MedicineReminder() {
   const soon = reminders.filter(r => r.color === 'yellow');
 
   const addReminder = () => {
-    if (!form.medicine || !form.totalQty) { toast.error('Please fill all fields'); return; }
-    const pct = parseInt(form.remaining) / parseInt(form.totalQty);
+    const totalQty = parseInt(form.totalQty);
+    const remaining = parseInt(form.remaining || form.totalQty);
+    
+    if (!form.medicine || isNaN(totalQty)) { 
+      toast.error('Please fill required fields (Medicine Name & Total Quantity)'); 
+      return; 
+    }
+
+    const pct = Math.round((remaining / totalQty) * 100) / 100;
     const color = pct < 0.25 ? 'red' : pct < 0.5 ? 'yellow' : 'green';
     const daysPerUnit = form.frequency === 'Twice daily' ? 0.5 : form.frequency === 'Weekly' ? 7 : 1;
-    const refillDays = Math.round(parseInt(form.remaining) * daysPerUnit);
+    const refillDays = Math.round(remaining * daysPerUnit);
+
     setReminders(prev => [...prev, {
-      id: Date.now(), ...form,
-      totalQty: parseInt(form.totalQty),
-      remaining: parseInt(form.remaining || form.totalQty),
+      id: Date.now(),
+      ...form,
+      totalQty,
+      remaining,
       purchaseDate: new Date().toISOString().split('T')[0],
-      refillDays, color,
+      refillDays: isNaN(refillDays) ? 0 : refillDays,
+      color,
     }]);
     setForm({ medicine: '', dosage: '', frequency: 'Daily', totalQty: '', remaining: '' });
     setShowForm(false);
